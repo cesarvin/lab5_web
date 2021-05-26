@@ -1,0 +1,314 @@
+<html>
+
+<head>
+
+</head>
+
+<body>
+    <script type="application/javascript">
+
+        document.body.style.backgroundColor = '#e5ddd5'
+        document.body.style.backgroundImage = 'url(\'bg.png\')'
+        document.body.style.backgroundOpa
+
+        const sendbox = document.createElement('div')
+        sendbox.id = 'messageIn'
+        sendbox.style.position = 'relative'
+        sendbox.style.display = 'flex'
+        sendbox.style.background = '#f0f0f0'
+        sendbox.style.width = '100%'
+        sendbox.style.height = '10%'
+        sendbox.style.justifyContent = 'center'
+
+        const chat = document.createElement('div')
+        chat.id = 'messagesList'
+        chat.style.position = 'relative'
+        chat.style.display = 'flex'
+        chat.style.background = 'transparent'
+        chat.style.width = '100%'
+        chat.style.height = '90%'
+        chat.style.overflow = 'scroll'
+        chat.style.wordWrap = 'break-word'
+        chat.style.justifyContent = 'center'
+
+        document.body.append(chat)
+
+        function callPrompt() {
+            usrname = prompt('Cuál es su nombre')
+            if (usrname == null) {
+                alert('Es necesario ingrsar su nombre')
+                callPrompt('Cuál es su nombre')
+            }
+            return usrname
+        }
+
+        if (!name) {
+            name = callPrompt()
+        }
+        if (name)
+            console.log(name)
+
+
+        const ta = document.createElement('textarea')
+        ta.style.width = '500px'
+        ta.style.height = '100%'
+        ta.style.borderRadius = '10px'
+        ta.style.maxLength = '140'
+        ta.setAttribute('maxlength', 140)
+        sendbox.append(ta)
+
+        const divinput = document.createElement('div')
+        divinput.style.margin = '0px 10px 0px 10px'
+        divinput.style.display = 'flex'
+        divinput.style.flexDirection = 'column'
+
+        divinput.append(ta);
+
+        cont = 140
+        contmsg = 0
+
+        const cc = document.createElement('span')
+
+        cc.append('140/140')
+        ta.addEventListener('keydown', (event) => {
+            cont = 140 - ta.value.length
+            cc.innerHTML = ''
+            cc.append(cont + '/140')
+            if (event.keyCode == 13) {
+                fetch('http://ubeje.xyz:3000/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender: name,
+                        message: ta.value,
+                        date: new Date(),
+                    })
+                }).then(result => {
+                    cc.innerHTML = ''
+                    cc.append('140/140')
+                    ta.innerHTML = ''
+                    ta.value = ''
+                    ta.focus();
+                    
+                })
+
+            } else if (event.keyCode == 8) {
+                cont = 140 - ta.value.length
+                cc.innerHTML = ''
+                cc.append(cont + '/140')
+            }
+        })
+
+        divinput.append(cc);
+        sendbox.append(divinput)
+        const button = document.createElement('button')
+        button.style.width = '60px'
+        button.style.height = '60px'
+
+        button.innerHTML = '<img src="send.png" style="width: 30px;"/>';
+        sendbox.append(button)
+
+        document.body.append(sendbox)
+
+        button.addEventListener('click', () => {
+            fetch('http://ubeje.xyz:3000/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: name,
+                    message: ta.value,
+                    date: '2021-02-12:18:56',
+                })
+            }).then(result => {
+                cc.innerHTML = ''
+                cc.append('140/140')
+                ta.innerHTML = ''
+                ta.value = ''
+                ta.focus()
+            })
+        })
+
+        const listaDeMensajes = document.createElement('ul')
+        listaDeMensajes.style.listStyleImage = 'url(\'message.svg\')'
+        chat.append(listaDeMensajes)
+
+        lastElement = []
+
+        function getMessages() {
+            fetch('http://ubeje.xyz:3000/messages').then((r) => {
+                return r.json()
+            }).then((j) => {
+                contmsg = j.length
+                j.forEach((mensaje) => {
+
+
+                    const unMensaje = document.createElement('li')
+
+                    const messageContent = document.createElement('div')
+                    messageContent.style.position = 'relative';
+                    messageContent.style.display = 'inline-table';
+                    messageContent.style.background = '#c4ffeb';
+                    messageContent.style.width = '100%';
+                    messageContent.style.height = '100px';
+                    messageContent.style.margin = '0px 20px 20px 20px';
+                    messageContent.style.borderRadius = '10px';
+                    messageContent.style.boxShadow = '5px 5px #888888';
+
+                    const messageContentHead = document.createElement('div')
+                    messageContentHead.style.display = 'flex';
+                    messageContentHead.style.justifyContent = 'space-between';
+
+                    const p1 = document.createElement('h3')
+                    const hr = document.createElement('hr')
+                    const p2 = document.createElement('p')
+
+                    p1.style.margin = '10px 10px 0px 10px'
+                    p1.style.width = '500px'
+                    p2.style.margin = '0px 10px 0px 10px'
+                    p2.style.width = '500px'
+                    hr.style.margin = '3px'
+                    hr.style.opacity = '0.2'
+
+                    p1.append('@' + mensaje.sender)
+
+                    const messageImage = document.createElement('img')
+
+                    messageContentHead.append(p1)
+                    if (mensaje.date) {
+                        const sp = document.createElement('small')
+                        sp.append(mensaje.date)
+                        sp.style.margin = '10px 10px 0px 10px'
+                        messageContentHead.append(sp)
+                    }
+
+                    messageContent.append(messageContentHead)
+                    messageContent.append(hr)
+
+                    if (mensaje.message) {
+                        if (mensaje.message.toString().includes('http') && (mensaje.message.toString().includes('.jpg')
+                            || mensaje.message.toString().includes('.jpeg')
+                            || mensaje.message.toString().includes('.png')
+                            || mensaje.message.toString().includes('.gif')
+                            || mensaje.message.toString().includes('.svg'))) {
+                            messageImage.setAttribute('src', mensaje.message.toString())
+                            messageImage.setAttribute('width', '300px')
+                            messageImage.style.margin = '10px'
+                            messageContent.append(messageImage)
+                        } else {
+                            p2.append(mensaje.message)
+                            messageContent.append(p2)
+                        }
+                    }
+
+                    unMensaje.append(messageContent)
+
+                    listaDeMensajes.append(unMensaje)
+                })
+            })
+        }
+
+
+        getMessages()
+
+        function interval() {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve('Refreshed')
+                }, 1000)
+            })
+        }
+
+        const refreshMessages = async (now) => {
+            while (true) {
+                    const timer = await interval()
+                
+                fetch('http://ubeje.xyz:3000/messages').then((r) => {
+                    return r.json()
+                }).then((refresh) => {
+                    const newcontmsg = refresh.length
+                    if (contmsg < newcontmsg) {
+
+                        // Se agregan todos los mensajes nuevos
+                        refresh.forEach((mensaje) => {
+
+                            if (mensaje.id > contmsg) {
+                                contmsg++
+                                const unMensaje = document.createElement('li')
+
+                                const messageContent = document.createElement('div')
+                                messageContent.style.position = 'relative';
+                                messageContent.style.display = 'inline-table';
+                                messageContent.style.background = '#c4ffeb';
+                                messageContent.style.width = '100%';
+                                messageContent.style.height = '100px';
+                                messageContent.style.margin = '0px 20px 20px 20px';
+                                messageContent.style.borderRadius = '10px';
+                                messageContent.style.boxShadow = '5px 5px #888888';
+
+                                const messageContentHead = document.createElement('div')
+                                messageContentHead.style.display = 'flex';
+                                messageContentHead.style.justifyContent = 'space-between';
+
+                                const p1 = document.createElement('h3')
+                                const hr = document.createElement('hr')
+                                const p2 = document.createElement('p')
+
+                                p1.style.margin = '10px 10px 0px 10px'
+                                p1.style.width = '500px'
+                                p2.style.margin = '0px 10px 0px 10px'
+                                p2.style.width = '500px'
+                                hr.style.margin = '3px'
+                                hr.style.opacity = '0.2'
+
+                                p1.append('@' + mensaje.sender)
+
+                                const messageImage = document.createElement('img')
+
+                                messageContentHead.append(p1)
+                                if (mensaje.date) {
+                                    const sp = document.createElement('small')
+                                    sp.append(mensaje.date)
+                                    sp.style.margin = '10px 10px 0px 10px'
+                                    messageContentHead.append(sp)
+                                }
+
+                                messageContent.append(messageContentHead)
+                                messageContent.append(hr)
+
+                                if (mensaje.message) {
+                                    if (mensaje.message.toString().includes('http') && (mensaje.message.toString().includes('.jpg')
+                                        || mensaje.message.toString().includes('.jpeg')
+                                        || mensaje.message.toString().includes('.png')
+                                        || mensaje.message.toString().includes('.gif')
+                                        || mensaje.message.toString().includes('.svg'))) {
+                                        messageImage.setAttribute('src', mensaje.message.toString())
+                                        messageImage.setAttribute('width', '300px')
+                                        messageImage.style.margin = '10px'
+                                        messageContent.append(messageImage)
+                                    } else {
+                                        p2.append(mensaje.message)
+                                        messageContent.append(p2)
+                                    }
+                                }
+
+                                unMensaje.append(messageContent)
+
+                                listaDeMensajes.append(unMensaje)
+                            }
+
+                        })
+                    }
+                })
+            }
+        }
+
+        refreshMessages();
+
+    </script>
+</body>
+
+</html>
